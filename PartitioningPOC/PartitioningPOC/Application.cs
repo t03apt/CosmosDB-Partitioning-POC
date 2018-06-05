@@ -76,9 +76,6 @@ namespace PartitioningPOC
 
         private async Task<DocumentCollection> EnsureCollectionExists()
         {
-            // Define "deviceId" as the partition key
-            // Set throughput to the minimum value of 10,100 RU/s
-
             var collectionDefinition = new DocumentCollection
             {
                 Id = _collectionName,

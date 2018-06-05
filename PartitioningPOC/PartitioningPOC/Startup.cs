@@ -40,18 +40,17 @@ namespace PartitioningPOC
 
         private static void LogException(Exception e)
         {
-            ConsoleColor color = Console.ForegroundColor;
+            var color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
 
-            if (e is DocumentClientException)
+            if (e is DocumentClientException de)
             {
-                DocumentClientException de = (DocumentClientException)e;
-                Exception baseException = de.GetBaseException();
+                var baseException = de.GetBaseException();
                 Log.Logger.Information("{0} error occurred: {1}, Message: {2}", de.StatusCode, de.Message, baseException.Message);
             }
             else
             {
-                Exception baseException = e.GetBaseException();
+                var baseException = e.GetBaseException();
                 Log.Logger.Information("Error: {0}, Message: {1}", e.Message, baseException.Message);
             }
 
