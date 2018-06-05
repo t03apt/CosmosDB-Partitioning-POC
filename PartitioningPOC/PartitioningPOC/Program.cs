@@ -13,7 +13,7 @@ namespace PartitioningPOC
         private readonly string _databaseName = "samples";
         private readonly string _collectionName = "partitioning-poc";
 
-        private readonly string _endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"] ?? "https://localhost.fiddler:8081";
+        private readonly string _endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"] ?? "https://localhost:8081";
         private readonly string _authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"] ?? "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
 
         private DocumentClient _client;
