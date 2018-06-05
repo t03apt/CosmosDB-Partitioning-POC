@@ -8,7 +8,7 @@ using Microsoft.Azure.Documents.Linq;
 
 namespace PartitioningPOC
 {
-    internal class UserRepository : IRepository<string, UserDto>
+    internal class UserRepository : IUserRepository
     {
         private const int NumberOfPartitions = 1000;
 
