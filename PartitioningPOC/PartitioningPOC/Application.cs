@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 using GenFu;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.Logging;
 using Generator = GenFu.GenFu;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace PartitioningPOC
 {
-    class Program
+    internal class Application
     {
         private readonly string _databaseName = "samples";
         private readonly string _collectionName = "partitioning-poc";
@@ -16,27 +18,15 @@ namespace PartitioningPOC
         private readonly string _endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"] ?? "https://localhost:8081";
         private readonly string _authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"] ?? "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
 
+        private readonly ILogger _logger;
         private DocumentClient _client;
 
-        private static async Task Main(string[] args)
+        public Application(ILogger<Application> logger)
         {
-            try
-            {
-                var app = new Program();
-                await app.Run();
-            }
-            catch (Exception e)
-            {
-                LogException(e);
-            }
-            finally
-            {
-                Console.WriteLine("End of demo, press any key to exit.");
-                Console.ReadKey();
-            }
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private async Task Run()
+        public async Task Run()
         {
             using (_client = new DocumentClient(
                 new Uri(_endpointUrl), _authorizationKey,
@@ -59,18 +49,18 @@ namespace PartitioningPOC
 
                 var users = Generator.ListOf<UserDto>(2);
 
-                Console.WriteLine(nameof(repository.GetAsync));
+                _logger.LogInformation(nameof(repository.GetAsync));
                 foreach (var userInfo in users)
                 {
                     await repository.CreateAsync(userInfo);
                     var user = await repository.GetAsync(userInfo.TenantId, userInfo.Id);
-                    Console.WriteLine($"TenantId:{user.TenantId} Id:{user.Id} Email:{user.Email}");
+                    _logger.LogInformation("TenantId:{TenantId} Id:{UserId} Email:{Email}", user.TenantId, user.Id, user.Email);
                 }
 
-                Console.WriteLine(nameof(repository.GetAllAsync));
+                _logger.LogInformation(nameof(repository.GetAllAsync));
                 foreach (var user in await repository.GetAllAsync(tenantId))
                 {
-                    Console.WriteLine($"TenantId:{user.TenantId} Id:{user.Id} Email:{user.Email}");
+                    _logger.LogInformation("TenantId:{TenantId} Id:{UserId} Email:{Email}", user.TenantId, user.Id, user.Email);
                 }
             }
         }
@@ -107,26 +97,6 @@ namespace PartitioningPOC
                 new RequestOptions { OfferThroughput = 400 });
 
             return partitionedCollection;
-        }
-
-        private static void LogException(Exception e)
-        {
-            ConsoleColor color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-
-            if (e is DocumentClientException)
-            {
-                DocumentClientException de = (DocumentClientException)e;
-                Exception baseException = de.GetBaseException();
-                Console.WriteLine("{0} error occurred: {1}, Message: {2}", de.StatusCode, de.Message, baseException.Message);
-            }
-            else
-            {
-                Exception baseException = e.GetBaseException();
-                Console.WriteLine("Error: {0}, Message: {1}", e.Message, baseException.Message);
-            }
-
-            Console.ForegroundColor = color;
         }
     }
 }
