@@ -67,7 +67,8 @@ namespace PartitioningPOC
                 new FeedOptions
                 {
                     MaxItemCount = -1,
-                    EnableCrossPartitionQuery = true
+                    EnableCrossPartitionQuery = true,
+                    //PartitionKey = new PartitionKey(_partitionKeyGenerator.CreateAll(tenantId, NumberOfPartitions).ToList())
                 })
                 .Where(user => user.TenantId == tenantId)
                 .AsDocumentQuery();

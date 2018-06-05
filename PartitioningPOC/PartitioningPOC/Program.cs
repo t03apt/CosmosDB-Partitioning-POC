@@ -13,7 +13,7 @@ namespace PartitioningPOC
         private readonly string _databaseName = "samples";
         private readonly string _collectionName = "partitioning-poc";
 
-        private readonly string _endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"] ?? "https://localhost:8081";
+        private readonly string _endpointUrl = ConfigurationManager.AppSettings["EndPointUrl"] ?? "https://localhost.fiddler:8081";
         private readonly string _authorizationKey = ConfigurationManager.AppSettings["AuthorizationKey"] ?? "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
 
         private DocumentClient _client;
@@ -38,7 +38,12 @@ namespace PartitioningPOC
 
         private async Task Run()
         {
-            using (_client = new DocumentClient(new Uri(_endpointUrl), _authorizationKey))
+            using (_client = new DocumentClient(
+                new Uri(_endpointUrl), _authorizationKey,
+                new ConnectionPolicy
+                {
+                    EnableEndpointDiscovery = false
+                }))
             {
                 await EnsureDatabaseExists();
                 await EnsureCollectionExists();
@@ -49,8 +54,8 @@ namespace PartitioningPOC
                 Generator.Configure<UserDto>()
                     .Fill(p => p.Id, _ => Guid.NewGuid().ToString())
                     .Fill(p => p.TenantId, tenantId)
-                    .Fill(p => p.Email).AsEmailAddress();
-                    //.Fill(p => p.PartitionKey, (string)null);
+                    .Fill(p => p.Email).AsEmailAddress()
+                    .Fill(p => p.PartitionKey, (string)null);
 
                 var users = Generator.ListOf<UserDto>(2);
 
